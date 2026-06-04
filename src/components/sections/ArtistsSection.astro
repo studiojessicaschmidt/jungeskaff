@@ -1,0 +1,204 @@
+---
+/**
+ * ArtistsSection
+ *
+ * Stellt die fünf Künstler:innen der Ausstellung vor. Jede Karte:
+ * Links ein quadratisches, angeschnittenes Porträtfoto (1:1), rechts
+ * Name (Bold, Display-Skala) und Bio-Text. Auf Mobile stapeln sich
+ * Foto und Text untereinander.
+ *
+ * Bild-Quelle: src/assets/01.jpg bis 04.jpg (Astro <Image> für
+ * responsive srcset + WebP). Marie Quitté hat noch kein Foto —
+ * dort erscheint ein grauer Platzhalter-Kasten.
+ */
+
+import { Image } from "astro:assets";
+import Container from "../ui/Container.astro";
+import img01 from "../../assets/01.jpg";
+import img02 from "../../assets/02.jpg";
+import img03 from "../../assets/03.jpg";
+import img04 from "../../assets/04.jpg";
+import img05 from "../../assets/05.jpg";
+
+interface Artist {
+  name: string;
+  bio: string;
+  image?: ImageMetadata;
+}
+
+import type { ImageMetadata } from "astro";
+
+const artists: Artist[] = [
+  {
+    name: "Chantal Knickmeyer",
+    bio: "Chantal verwebt in ihrer Arbeit textile Materialien, Garn, Watte und Polaroidfotografien zu fragilen Bildräumen, die zwischen Zartheit und Schmerz schwingen. Mit den Mitteln der Handarbeit — einer Praxis, die Fürsorge und Wiederholung gleichermaßen einschreibt — nähert sie sich Themen wie Mütterlichkeit, Elternhaus und Trauer. Manchen Arbeiten ist dabei auch das Abjekte eingeschrieben: das, was verdrängt und ausgestoßen wird — und dennoch tief vertraut bleibt.",
+    image: img04,
+  },
+  {
+    name: "Ala Martens",
+    bio: "Die Arbeiten versuchen sich an einer Übersetzung von inneren Atmosphären, Zuständen und Wahrnehmungen in äußere Gestalt [Innenausstülpungen]. Sich ein- und ausstülpende Aspekte, die körperlich, fragmentarisch, flüchtig-zart daherschimmern oder als Raum einnehmendes Gegenüber auftreten. Verborgenes und Sichtbares reichen sich die Hände, während unklar scheint, wer es schafft, Fuß zu fassen.",
+    image: img02,
+  },
+  {
+    name: "Juliane Twesten",
+    bio: "In ihrer Arbeit untersucht Juliane das Zusammenspiel zwischen der Körperlichkeit der Kuh und der Sinnlichkeit der Malerei. Erinnerungen an das Aufwachsen auf einem Bauernhof mit einer Milchkuhherde treten dabei in Verbindung mit bildnerischen Qualitäten wie Stimmung, Bildausschnitt und Oberfläche. Die Darstellung der Tierkörper wird durch Momente von Erhabenheit, Naivität und Entgrenzung aufgebrochen.",
+    image: img03,
+  },
+  {
+    name: "João Krahl",
+    bio: "In seiner Kunst bringt João malerisch und zeichnerisch imaginierte oder erlebte Szenen zum Ausdruck. Dabei steht das Zwischenmenschliche und Beziehungen im Mittelpunkt. Situationen aus dem Alltag, Momentaufnahmen und Stimmungen sind Gegenstand von seinem kreativen Wirken.",
+    image: img01,
+  },
+  {
+    name: "Marie Quitté",
+    bio: "Mit ihrer Malerei beschäftigt sich Marie mit den untrennbaren Eigenheiten und der Einzigartigkeit menschlicher Züge, eingebettet in ein Umfeld aus abstrakten und emotional geprägten Ausdrucksformen. In einem stetigen Dialog zwischen Intention und Prozess entstehen mal geformte, mal zufällig hervorgegangene Ergebnisse. Im Spannungsfeld zwischen An- und Abwesenheit, Bewegung und Stillstand, Zerfall und Form entstehen Bildräume, die sich nicht eindeutig festlegen lassen.",
+    image: img05,
+  },
+];
+
+interface Props {
+  heading: string;
+}
+
+const { heading } = Astro.props;
+---
+
+<section id="kuenstlerinnen" class="artists" aria-labelledby="artists-heading">
+  <Container size="default">
+    <h2 id="artists-heading" class="artists__heading">{heading}</h2>
+    <ul class="artists__list">
+      {
+        artists.map((artist) => (
+          <li class="artist">
+            <div class="artist__image-wrapper">
+              {artist.image ? (
+                <Image
+                  class="artist__image"
+                  src={artist.image}
+                  alt={`Porträtfoto von ${artist.name}`}
+                  width={480}
+                  height={480}
+                  loading="lazy"
+                />
+              ) : (
+                <div class="artist__image-placeholder" aria-hidden="true" />
+              )}
+            </div>
+            <div class="artist__content">
+              <h3 class="artist__name">{artist.name}</h3>
+              <p class="artist__bio">{artist.bio}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>
+
+<style>
+  .artists {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  /* Section-Headline-Skala (32–56px), konsistent mit anderen Sektionen */
+  .artists__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-2xl);
+  }
+
+  .artists__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3xl);
+  }
+
+  .artists__list > li + li {
+    margin-block-start: 0;
+  }
+
+  /* Einzelne Karte: Mobile untereinander (Bild oben, Text unten) */
+  .artist {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  /* Ab 48em: Bild links (feste Breite), Text rechts */
+  @media (min-width: 48em) {
+    .artist {
+      grid-template-columns: 240px 1fr;
+      gap: var(--space-2xl);
+    }
+  }
+
+  @media (min-width: 75em) {
+    .artist {
+      grid-template-columns: 320px 1fr;
+    }
+  }
+
+  /*
+   * Bild-Wrapper: erzwingt 1:1-Seitenverhältnis. object-fit: cover
+   * schneidet das Bild so an, dass es den quadratischen Rahmen ausfüllt.
+   */
+  .artist__image-wrapper {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .artist__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  /* Platzhalter für Künstler:innen ohne Foto */
+  .artist__image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(233, 231, 218, 0.15);
+  }
+
+  .artist__content {
+    display: grid;
+    gap: var(--space-sm);
+    align-content: start;
+  }
+
+  /* Name: H3-Display-Skala, Bold */
+  .artist__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  /* Bio: Body (16px Mobile → 18px Desktop), Senior-UI-Spec */
+  .artist__bio {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: 1.6;
+    max-width: 65ch;
+    opacity: 0.9;
+  }
+
+  @media (min-width: 48em) {
+    .artist__bio {
+      font-size: var(--text-lg);
+    }
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+/**
+ * BaseLayout
+ *
+ * Grundgerüst für jede Seite des Templates. Rendert:
+ * - <html>-Dokument mit lang-Attribut
+ * - <head> via SeoHead-Komponente
+ * - <body> mit SkipLink, Header, <main id="main-content"> und Footer
+ *
+ * Die drei Basis-Stylesheets (tokens, reset, global) werden hier einmal
+ * importiert und sind damit für jede Seite verfügbar, die dieses Layout
+ * nutzt. Einzelne Seiten importieren keine CSS-Dateien mehr direkt.
+ */
+
+import "../styles/tokens.css";
+import "../styles/project-overrides.css";
+import "../styles/reset.css";
+import "../styles/global.css";
+
+import SeoHead from "../components/seo/SeoHead.astro";
+import SkipLink from "../components/layout/SkipLink.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import DuotoneFilter from "../components/ui/DuotoneFilter.astro";
+import GrainOverlay from "../components/ui/GrainOverlay.astro";
+import Lightbox from "../components/ui/Lightbox.astro";
+import { t, getLang } from "../i18n/translations.ts";
+
+interface Props {
+  /** Seiten-Titel, z. B. "Impressum, Kundenname". Pflicht. */
+  title: string;
+  /** Kurze Seiten-Beschreibung für SEO und Open Graph. Pflicht. */
+  description: string;
+  /** Sprache des Dokuments. Default "de". */
+  lang?: string;
+  /** Absolute Canonical-URL. Optional. */
+  canonical?: string;
+  /** Absolute URL zu einem Open-Graph-Bild. Optional. */
+  ogImage?: string;
+  /** Wenn true, wird robots auf noindex,nofollow gesetzt. Default false. */
+  noindex?: boolean;
+}
+
+const { title, description, lang = "de", canonical, ogImage, noindex = false } = Astro.props;
+
+/* Lightbox-Beschriftungen aus den Übersetzungen ziehen */
+const texts = t(getLang(lang));
+
+/*
+ * Projekt-Daten für Header und Footer: KaFF, Kunst am Fluss.
+ * Header und Footer bleiben generisch; die KaFF-spezifischen Werte
+ * werden hier zentral gesetzt und weitergereicht. Anker mit "/#" damit
+ * sie von Unterseiten zur passenden Section auf der Index navigieren.
+ */
+const kaffNav = [
+  { label: "Galerie", href: "/#galerie" },
+  { label: "Über uns", href: "/#kuenstlerinnen" },
+  { label: "Events", href: "/#events" },
+  { label: "Kontakt", href: "/#kontakt" },
+];
+
+const kaffSocial = [
+  {
+    label: "Presse",
+    href: "https://www.weser-kurier.de/landkreis-verden/gemeinde-ottersberg/ausstellung-junges-kaff-fischerhude-zeitgenoessische-kunst-ab-16-mai-doc85tpn6xuadl1egxzzgwz",
+  },
+  { label: "KaFF Fischerhude", href: "https://kaffischerhude.de/" },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <SeoHead
+      title={title}
+      description={description}
+      canonical={canonical}
+      ogImage={ogImage}
+      noindex={noindex}
+    />
+  </head>
+  <body>
+    <SkipLink />
+    <DuotoneFilter />
+    {/* Seitenweite Körnung, fixiert hinter dem Inhalt, auf allen Seiten gleich */}
+    <div class="page-grain" aria-hidden="true">
+      <GrainOverlay blendMode="multiply" opacity={0.07} />
+    </div>
+    <Header brandName="Junges KaFF" brandHref="/" navItems={kaffNav} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer brandName="KaFF, Kunst am Fluss" socialLinks={kaffSocial} />
+    <Lightbox
+      closeLabel={texts.gallery.lightboxClose}
+      prevLabel={texts.gallery.lightboxPrev}
+      nextLabel={texts.gallery.lightboxNext}
+    />
+  </body>
+</html>
+
+<style>
+  /*
+   * Seitenweite Körnung: fixiert hinter dem Inhalt, zeigt nicht durch
+   * den Header durch (z-index 0, Header ist sticky mit höherem z-index).
+   */
+  .page-grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>

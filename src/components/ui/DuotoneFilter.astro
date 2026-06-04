@@ -1,0 +1,59 @@
+---
+/**
+ * DuotoneFilter
+ *
+ * Inline-SVG mit Filter-Definition für die Galerie. Einmal pro Seite in
+ * BaseLayout.astro eingebunden, über die ID via CSS referenzierbar:
+ * `filter: url(#duotone-purple)`.
+ *
+ * Wie es funktioniert: Der Filter desaturiert das Bild zuerst zu Grau
+ * (feColorMatrix), dann mappt feComponentTransfer jeden Grauwert auf
+ * eine Position zwischen zwei Farben:
+ *   Schwarz (0) → Lila #6d1b9f
+ *   Weiss  (1) → Pink #e72867
+ * Zwischenwerte interpolieren linear, sodass das Bild aussieht wie ein
+ * Druck mit zwei Farben (Plakat-Logik).
+ *
+ * Werte-Berechnung: Hex / 255 ergibt die normalisierten RGB-Anteile,
+ * die in den tableValues stehen.
+ *   #6d1b9f = (109, 27, 159) / 255 = (0.427, 0.106, 0.624)
+ *   #e72867 = (231, 40, 103) / 255 = (0.906, 0.157, 0.404)
+ */
+---
+
+<svg class="duotone-filters" aria-hidden="true" focusable="false" width="0" height="0">
+  <defs>
+    <filter
+      id="duotone-purple"
+      x="0"
+      y="0"
+      width="100%"
+      height="100%"
+      color-interpolation-filters="sRGB"
+    >
+      {/* Schritt 1: Bild zu Graustufen desaturieren */}
+      <feColorMatrix
+        type="matrix"
+        values="0.299 0.587 0.114 0 0
+                0.299 0.587 0.114 0 0
+                0.299 0.587 0.114 0 0
+                0     0     0     1 0"
+      />
+      {/* Schritt 2: Graustufen auf den Lila-Pink-Verlauf mappen */}
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0.427 0.906" />
+        <feFuncG type="table" tableValues="0.106 0.157" />
+        <feFuncB type="table" tableValues="0.624 0.404" />
+      </feComponentTransfer>
+    </filter>
+  </defs>
+</svg>
+
+<style>
+  .duotone-filters {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+</style>

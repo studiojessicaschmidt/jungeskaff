@@ -1,0 +1,1128 @@
+---
+/*
+ * Startseite: Junges KaFF
+ *
+ * Phase-1-Preview: Hero, Eckdaten der Ausstellung, Hinweis auf weitere
+ * Sektionen (Galerie, Künstler:innen, Events, Kontakt) folgen in Phase 3+.
+ *
+ * Inhalte stammen aus dem Plakat (16.04.2026). Bios, Galerie und
+ * Kontaktformular werden in späteren Phasen ergänzt.
+ */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import GallerySection from "../components/sections/GallerySection.astro";
+import ArtistsSection from "../components/sections/ArtistsSection.astro";
+import { t, getLang } from "../i18n/translations.ts";
+import { events } from "../data/events.ts";
+
+const lang = getLang("de");
+const texts = t(lang);
+
+/*
+ * Filter: nur kommende Veranstaltungen anzeigen. "Heute oder später"
+ * gilt als kommend. Vergangene Events werden ausgeblendet, damit die
+ * Liste nach jedem Event automatisch kürzer wird ohne Pflegeaufwand.
+ */
+const today = new Date().toISOString().slice(0, 10);
+const upcomingEvents = events.filter((event) => event.date >= today);
+
+/* Datums-Formatter: ISO "2026-07-04" → "Samstag, 04.07.2026" (DE) */
+const dateFormatter = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "de-DE", {
+  weekday: "long",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+function formatEventDate(isoDate: string): string {
+  return dateFormatter.format(new Date(isoDate));
+}
+---
+
+<BaseLayout title={texts.meta.title} description={texts.meta.description}>
+  {/* Hero */}
+  <section class="hero" aria-labelledby="hero-heading">
+    <Container size="default" class="hero__inner">
+      <div class="hero__text">
+        <h1 id="hero-heading" class="hero__title">
+          Was vergeht<br />
+          und was bleibt.
+        </h1>
+        <p class="hero__dates">{texts.exhibition.dates}</p>
+        <p class="hero__museum">
+          {texts.hero.museumPrefix}{" "}
+          <a
+            class="hero__museum-link"
+            href={texts.hero.museumUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {texts.hero.museumName}
+          </a>
+        </p>
+        <p class="hero__location">{texts.exhibition.address}</p>
+        <div class="hero__artists">
+          <p class="hero__artists-heading">{texts.hero.artistsHeading}</p>
+          <ul class="hero__artists-list">
+            {texts.artists.list.map((artist) => (
+              <li>{artist.name}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Container>
+
+    {/* Cutouts an den Rändern, wie auf dem Plakat.
+        Nur zwei Cutouts: Küchenscene oben links und Kind unten rechts.
+        Cutout-1 (zwei Figuren) und cutout-4 (kauernde Figur) wurden
+        bewusst entfernt für eine ruhigere Komposition. */}
+    <img
+      class="hero__cutout hero__cutout--top-left"
+      src="/images/cutouts/cutout-2.png"
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+    />
+    <img
+      class="hero__cutout hero__cutout--mid-right"
+      src="/images/cutouts/cutout-5.png"
+      alt=""
+      aria-hidden="true"
+      loading="eager"
+    />
+
+  </section>
+
+  {/* Statement zur Ausstellung, längerer Lese-Text. Cutoff ab Paragraph 3 mit Blur + Mehr-Lesen-Button.
+      Desktop: 2-Spalten-Grid mit Cow-Cutout links und Heading + Body
+      rechts. Cow-Höhe matched die Höhe des Body-Texts (ohne Heading)
+      durch grid-row Platzierung. */}
+  <section id="ueber" class="about" aria-labelledby="about-heading">
+    <Container size="default">
+      <div class="about__grid">
+        <div class="about__visual-wrapper" aria-hidden="true">
+          <img
+            class="about__visual"
+            src="/images/cutouts/about-cow.png"
+            alt=""
+            loading="lazy"
+          />
+        </div>
+
+        <h2 id="about-heading" class="about__heading">{texts.about.heading}</h2>
+
+        <div class="about__body" data-collapsible data-expanded="false">
+          {/* Erste zwei Paragraphen immer voll sichtbar */}
+          {texts.about.paragraphs.slice(0, 2).map((p) => <p class="about__paragraph">{p}</p>)}
+
+          {/* Cutoff-Block: angeschnitten + geblurrt, klappt sich auf.
+              Mehrere Blur-Schichten lassen den Effekt von oben weich
+              anwachsen statt einer harten Kante. */}
+          <div class="about__cutoff">
+            {texts.about.paragraphs.slice(2).map((p) => <p class="about__paragraph">{p}</p>)}
+            <div class="about__cutoff-overlay" aria-hidden="true">
+              <div class="about__cutoff-blur" data-strength="1"></div>
+              <div class="about__cutoff-blur" data-strength="2"></div>
+              <div class="about__cutoff-blur" data-strength="3"></div>
+              <div class="about__cutoff-blur" data-strength="4"></div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="about__toggle"
+            data-collapsible-trigger
+            data-label-collapsed={texts.about.readMore}
+            data-label-expanded={texts.about.readLess}
+            aria-expanded="false"
+          >
+            <span data-label>{texts.about.readMore}</span>
+          </button>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  {/* Eckdaten der Ausstellung, helle Sektion mit pinkem Text.
+      markiert die Sektion als Creme-Hintergrund,
+      damit das Header-Script den Navbar-Text auf Pink umfärbt sobald
+      diese Sektion hinter dem Header liegt. */}
+  <section
+    id="ausstellung"
+    class="exhibition"
+    aria-labelledby="exhibition-heading"
+  >
+    <Container size="default">
+      <h2 id="exhibition-heading" class="exhibition__heading">{texts.exhibition.heading}</h2>
+      <dl class="exhibition__list">
+        <div class="exhibition__row">
+          <dt>Laufzeit</dt>
+          <dd>{texts.exhibition.dates}</dd>
+        </div>
+        <div class="exhibition__row">
+          <dt>Ort</dt>
+          <dd>
+            {texts.exhibition.museum}<br />
+            {texts.exhibition.address}
+          </dd>
+        </div>
+        <div class="exhibition__row">
+          <dt>{texts.exhibition.admissionLabel}</dt>
+          <dd>
+            {texts.exhibition.admissionRegular}<br />
+            {texts.exhibition.admissionReduced}
+          </dd>
+        </div>
+        <div class="exhibition__row">
+          <dt>{texts.exhibition.openingLabel}</dt>
+          <dd>{texts.exhibition.openingDate}</dd>
+        </div>
+      </dl>
+    </Container>
+  </section>
+
+  {/* Galerie: Vernissage-Fotos im Duotone-Look, Hover zeigt Originalfarbe, Klick öffnet Lightbox */}
+  <GallerySection
+    heading={texts.gallery.heading}
+    expandLabel={texts.gallery.viewAll}
+    collapseLabel={texts.gallery.viewLess}
+  />
+
+  {/* Video-Section: Junges-KaFF-Video, 16:9, natives <video>-Element.
+      Spielt automatisch ab sobald die Sektion im Viewport ist (per
+      IntersectionObserver, siehe video-autoplay.ts), loopt, stummge-
+      schaltet (Voraussetzung für Autoplay in modernen Browsern). */}
+  <section id="video" class="video" aria-label="Video">
+    <Container size="default">
+      <video
+        class="video__player"
+        data-video-autoplay
+        muted
+        loop
+        playsinline
+        controls
+        preload="metadata"
+      >
+        <source src="/videos/junges-kaff.webm" type="video/webm" />
+        <source src="/videos/junges-kaff.mp4" type="video/mp4" />
+        Ihr Browser unterstützt das Video-Element nicht.
+      </video>
+    </Container>
+  </section>
+
+  {/* Künstler:innen-Vorstellung: Porträtfoto + Name + Bio */}
+  <ArtistsSection heading="Über uns" />
+
+  {/* Kommende Veranstaltungen, aus events.ts. Vergangene werden ausgeblendet. */}
+  <section id="events" class="events" aria-labelledby="events-heading">
+    <Container size="default">
+      <h2 id="events-heading" class="events__heading">{texts.events.heading}</h2>
+      {upcomingEvents.length === 0 ? (
+        <p class="events__empty">{texts.events.empty}</p>
+      ) : (
+        <ul class="events__list">
+          {upcomingEvents.map((event) => {
+            const title = lang === "en" && event.titleEn ? event.titleEn : event.title;
+            const time = lang === "en" && event.timeEn ? event.timeEn : event.time;
+            const description =
+              lang === "en" ? event.descriptionEn : event.descriptionDe;
+            return (
+              <li class="event">
+                <p class="event__date">
+                  {formatEventDate(event.date)}{time && ` | ${time}`}
+                </p>
+                <h3 class="event__title">{title}</h3>
+                {description && <p class="event__description">{description}</p>}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Container>
+  </section>
+
+  {/* Kontakt-Section. Schlanker Block mit Intro und E-Mail (mailto).
+      Echtes Formular folgt in Phase 5. */}
+  <section id="kontakt" class="contact" aria-labelledby="contact-heading">
+    <Container size="default">
+      <h2 id="contact-heading" class="contact__heading">{texts.contact.heading}</h2>
+      <p class="contact__intro">{texts.contact.intro}</p>
+      <dl class="contact__list">
+        <div class="contact__row">
+          <dt>{texts.contact.emailLabel}</dt>
+          <dd>
+            <a class="contact__link" href={`mailto:${texts.contact.email}`}>
+              {texts.contact.email}
+            </a>
+          </dd>
+        </div>
+      </dl>
+    </Container>
+  </section>
+</BaseLayout>
+
+<script>
+  // Synct die Cow-Wrapper-Höhe auf die Höhe des About-Body-Texts
+  // (nur Desktop ab 1200px). Siehe Script-Datei für Details.
+  import "../scripts/about-visual-sync";
+  // Spielt das Video automatisch ab sobald es im Viewport ist.
+  import "../scripts/video-autoplay";
+</script>
+
+<style>
+  /*
+   * Hero
+   * ------------------------------------------------------------------ */
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-3xl) var(--space-2xl);
+    /*
+     * clip-path statt overflow: hidden, damit der top-left Cutout nach
+     * oben in den Header-Bereich ragen darf (negativer inset-block-start).
+     * Oben 300px Überlauf erlaubt, links/rechts/unten geclippt. Die Navbar-
+     * Texte liegen durch den hohen z-index des sticky Headers automatisch
+     * über dem Cutout.
+     */
+    clip-path: inset(-300px 0 0 0);
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  /*
+   * Display-Headline. Kurzes Zitat aus dem Statement, zwei Zeilen.
+   * Senior-UI-Spec für Display: 56–96 px, hier clamp(2rem, 7vw, 5.5rem)
+   * = 32–88 px für ausreichende Wirkung ohne Überlauf bei kleinen
+   * Viewports.
+   */
+  .hero__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    /* Min 64px (mobile, 4rem), skaliert mit 9vw, max 88px (Desktop).
+       Mobile zeigt jetzt 64px statt vorher 32px (verdoppelt).
+       Tablet (800px) ~72px, Desktop (1280px+) max 88px. */
+    font-size: clamp(4rem, 9vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-lg);
+    max-width: 18ch;
+  }
+
+  /*
+   * Sekundär-Texte schmal halten, damit Zeilen nicht zu breit werden.
+   * Die Headline darf die volle Container-Breite nutzen.
+   */
+  .hero__dates,
+  .hero__museum,
+  .hero__location,
+  .hero__artists {
+    max-width: 40ch;
+  }
+
+  /* H3-Skala (20–30px) für Hero-Datum */
+  .hero__dates {
+    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    font-weight: var(--weight-medium);
+    margin: 0 0 var(--space-2xs);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /*
+   * Museum-Zeile (zw. Datum und Adresse): gleiche Schriftgrösse wie
+   * .hero__location (Adresse) auf allen Breakpoints, damit die zwei
+   * zusammengehörigen Sekundär-Zeilen visuell als ein Block wirken.
+   * Beide nutzen --text-lg (18px) konstant.
+   */
+  .hero__museum {
+    font-size: var(--text-lg);
+    margin: 0 0 var(--space-2xs);
+    line-height: 1.5;
+    opacity: 0.95;
+  }
+
+  .hero__museum-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-thickness var(--duration-fast) var(--ease-standard);
+  }
+
+  .hero__museum-link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__museum-link {
+      transition: none;
+    }
+  }
+
+  /* Body groß (18px), Senior-UI-Body-Spec */
+  .hero__location {
+    font-size: var(--text-lg);
+    margin: 0 0 var(--space-lg);
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  /* Künstler:innen-Block: Heading "Arbeiten von:" + jede Person auf
+     einer eigenen Zeile. Heading visuell etwas schmaler / weniger
+     dominant, Liste in Body-Skala. */
+  .hero__artists {
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  .hero__artists-heading {
+    font-size: var(--text-base);
+    margin: 0 0 var(--space-2xs);
+    line-height: 1.5;
+    font-weight: var(--weight-medium);
+  }
+
+  .hero__artists-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--text-base);
+    line-height: 1.5;
+  }
+
+  .hero__artists-list > li + li {
+    margin-block-start: 0;
+  }
+
+  /* ------------------------------------------------------------------
+   * Cutouts
+   * Absolut positioniert, schauen vom Rand in den Hero hinein.
+   * Auf allen Viewports sichtbar, Grössen rasten an Breakpoints ein
+   * (Mobile, Tablet ab 48em, Desktop ab 75em) statt fließend zu skalieren.
+   * ------------------------------------------------------------------ */
+
+  .hero__cutout {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Mobile (Default, < 48em)
+     Zwei Cutouts: Küchenscene oben links (7% weiter links angeschnitten
+     für beabsichtigte Crop-Optik) und Kind unten rechts. */
+  .hero__cutout--top-left {
+    inset-block-start: -5%;
+    inset-inline-start: -10%;
+    width: 200px;
+    transform: rotate(-15deg);
+  }
+
+  /* Kind unten rechts, etwas weiter hoch gesetzt (block-end: 4%).
+     Inline-end -2% lässt es knapp über den rechten Rand ragen. */
+  .hero__cutout--mid-right {
+    inset-block-end: 4%;
+    inset-inline-end: -2%;
+    width: 310px;
+  }
+
+  /* Tablet ab 48em
+     Küchenscene 7% weiter links angeschnitten (-2% → -9%) für
+     deutlicheren Crop-Effekt am Rand. */
+  @media (min-width: 48em) {
+    .hero__cutout--top-left {
+      inset-block-start: -8%;
+      inset-inline-start: -9%;
+      width: 240px;
+      transform: rotate(-15deg);
+    }
+
+    .hero__cutout--mid-right {
+      inset-block-end: 2%;
+      inset-inline-end: 0;
+      width: 550px;
+    }
+  }
+
+  /* Desktop ab 75em
+     Küchenscene weiter oben und etwas mehr nach links — sitzt jetzt
+     leicht über den Hero-Top hineinragend für eine dynamischere
+     Komposition. Rechtes Kind unverändert. */
+  @media (min-width: 75em) {
+    .hero__cutout--top-left {
+      inset-block-start: -9%;
+      inset-inline-start: 1%;
+      width: 250px;
+      transform: rotate(-15deg);
+    }
+
+    .hero__cutout--mid-right {
+      inset-block-end: 0;
+      inset-inline-end: 2%;
+      width: 670px;
+    }
+  }
+
+
+  /* ------------------------------------------------------------------
+   * Ausstellungs-Eckdaten, gleicher Pink-Hintergrund + beige Schrift
+   * wie alle anderen Sections (kein heller invertierter Block mehr).
+   * ------------------------------------------------------------------ */
+
+  .exhibition {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  /* Section-Headline-Skala (32–56px), konsistent mit anderen Sektionen */
+  .exhibition__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    margin: 0 0 var(--space-xl);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+
+  .exhibition__list {
+    margin: 0 auto;
+    display: grid;
+    gap: var(--space-lg);
+    max-width: 50rem;
+  }
+
+  .exhibition__row {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block-end: var(--space-md);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .exhibition__row:last-child {
+    border-block-end: 0;
+    padding-block-end: 0;
+  }
+
+  /* Label: Base-Text (16px) mit Uppercase und Letter-Spacing */
+  .exhibition__row dt {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    opacity: 0.7;
+  }
+
+  /* Wert: Body (16px Mobile → 18px Desktop), Senior-UI-Spec */
+  .exhibition__row dd {
+    font-size: var(--text-base);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Ab 48em: Spiegellayout mit echter Mittellinie auf Container-Mitte.
+     Zwei gleich breite Spalten (1fr 1fr) — dadurch liegt die Trennung
+     exakt in der Mitte und passt optisch zu den anderen Sections, die
+     eine 50/50-Teilung haben (z. B. About-Cow-Layout auf Desktop).
+     Labels (dt) auf der linken Seite rechtsbündig, Werte (dd) auf der
+     rechten Seite linksbündig. */
+  @media (min-width: 48em) {
+    .exhibition__list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-lg);
+      max-width: none;
+    }
+
+    .exhibition__row {
+      display: contents;
+      padding: 0;
+      border: 0;
+    }
+
+    .exhibition__row:last-child {
+      padding: 0;
+    }
+
+    .exhibition__row dt {
+      grid-column: 1;
+      text-align: right;
+    }
+
+    .exhibition__row dd {
+      grid-column: 2;
+      text-align: left;
+      font-size: var(--text-lg);
+    }
+
+    .exhibition__row {
+      grid-template-columns: unset;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * About-Sektion, Statement-Text
+   * H2-Heading, Body-Text auf Senior-UI-Spec (18px Desktop, 16px Mobile).
+   * Pinker Grund (Brand-Bühne), Zeilenlänge via max-width: 65ch
+   * (optimaler Lesefluss laut Skill).
+   * ------------------------------------------------------------------ */
+
+  .about {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+    /* Mobile: positioning context für die angeschnittene Cow links. */
+    overflow: hidden;
+  }
+
+  /* Grid-Layout: Mobile/Tablet single-column (cow nicht angezeigt),
+     Desktop 2 Spalten. Cow links, Heading + Body rechts.
+     Mobile gap: 0 — der heading-margin (--space-xl) übernimmt den
+     Abstand heading → body, damit das Spacing zu anderen Sections
+     wie "Die Ausstellung" identisch ist. */
+  .about__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Cow-Cutout-Wrapper.
+     Mobile: absolut links der Section, mostly angeschnitten (nur die
+     rechte Kante der Cow guckt rein). Text-Block wird per padding-
+     inline-start nach rechts gedrückt.
+     Desktop (s.u.): Wrapper steht im Grid, Cow füllt die linke Hälfte
+     aus. */
+  .about__visual-wrapper {
+    position: absolute;
+    /* Fixe Pixel-Position statt 50 % der Section-Höhe — dadurch
+       wandert die Cow nicht nach unten wenn der Body aufgeklappt
+       wird. 240 px matched die vertikale Mitte des Section-Inhalts
+       im zugeklappten Zustand. */
+    inset-block-start: 240px;
+    inset-inline-start: 0;
+    width: 266px;
+    aspect-ratio: 1 / 1;
+    pointer-events: none;
+    /* translateX(-30%) → 70 % der Cow ragt ins Bild (~186 px). */
+    transform: translate(-30%, -50%);
+    z-index: 0;
+    overflow: visible;
+  }
+
+  .about__visual {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: none;
+  }
+
+  /* Heading + Body rücken nach rechts, damit die angeschnittene Cow
+     sichtbar bleibt und der Text nicht überlappt wird. Margin statt
+     Padding, damit die Text-Box selbst verschoben wird. */
+  .about__heading,
+  .about__body {
+    position: relative;
+    z-index: 1;
+    margin-inline-start: 200px;
+  }
+
+  /* Section-Headline-Skala (32–56px), grosse Display-Headlines.
+     margin-inline-start nicht überschreiben — wird von der oberen
+     Regel auf 60 px für Mobile gesetzt (für den Cow-Versatz). */
+  .about__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-block: 0 var(--space-xl);
+    margin-inline-end: 0;
+  }
+
+  .about__body {
+    display: grid;
+    gap: var(--space-md);
+    /* Mobile: Body bekommt durch margin-inline-start schon ~60 px
+       Versatz nach rechts. Width auto + max-width sorgt dafür dass
+       der Lese-Block nicht den Container randvoll füllt. */
+    width: auto;
+    max-width: 52ch;
+  }
+
+  /* Tablet+: volle Breite bis 65ch. */
+  @media (min-width: 48em) {
+    .about__body {
+      width: 100%;
+      max-width: 65ch;
+    }
+  }
+
+  /* Desktop ab 75em: 2-Spalten-Layout mit Cow links und Text rechts.
+     Cow spannt beide grid-rows und ist via align-self: center mittig
+     ausgerichtet. Höhe wird via JS (about-visual-sync.ts) auf Body-
+     Höhe gesetzt, damit Cow optisch so gross wie der Mengentext ist
+     und vertikal zentriert in ihrer Hälfte sitzt.
+     Row-gap = --space-xl matched den Abstand Heading → Body der
+     anderen Sections. Body ist auf Desktop immer voll expandiert
+     (keine Cutoff, kein Toggle-Button). */
+  @media (min-width: 75em) {
+    .about__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-xl);
+      align-items: start;
+    }
+
+    .about__visual-wrapper {
+      /* Override Mobile-Positioning: zurück ins Grid, volle Breite
+         der linken Spalte. */
+      position: relative;
+      inset: auto;
+      width: auto;
+      aspect-ratio: auto;
+      grid-column: 1;
+      grid-row: 1 / 3;
+      align-self: center;
+      /* Höhe wird via JS auf 90 % der Sektionshöhe gesetzt
+         (about-visual-sync.ts). Zusätzlich 5 % nach unten verschoben
+         via translateY für leichten Versatz vom optischen Zentrum. */
+      transform: translateY(5%);
+    }
+
+    .about__visual {
+      /* Desktop: Cow ist 64 px vom rechten Spalten-Rand eingerückt,
+         object-fit kein contain mehr — Höhe füllt Wrapper, Breite ist
+         natürlich (überläuft die Spalte horizontal). */
+      inset-block-start: 0;
+      inset-inline-end: 64px;
+      inset-inline-start: auto;
+      height: 100%;
+      width: auto;
+      object-fit: initial;
+    }
+
+    .about__heading {
+      grid-column: 2;
+      grid-row: 1;
+      /* Kleinere Schrift damit "Über die Ausstellung" auf eine Zeile
+         passt im 50%-breiten Spalten-Layout. */
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-block-end: 0;
+      margin-inline-start: 0;
+      white-space: nowrap;
+    }
+
+    .about__body {
+      grid-column: 2;
+      grid-row: 2;
+      max-width: none;
+      margin-inline-start: 0;
+      width: 100%;
+    }
+  }
+
+  /* Body 16px Mobile → 18px ab Tablet, Zeilenhöhe 1.6 für Lesefluss */
+  .about__paragraph {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+
+  @media (min-width: 48em) {
+    .about__paragraph {
+      font-size: var(--text-lg);
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Cutoff-Block: enthält die Paragraphen 3–7. Im zugeklappten Zustand
+   * wird nur Paragraph 3 angeschnitten gezeigt mit einem Blur-Overlay,
+   * Paragraphen 4–7 sind komplett verborgen. Aufgeklappt zeigt der
+   * Block alle Paragraphen normal.
+   * ------------------------------------------------------------------ */
+
+  .about__cutoff {
+    display: grid;
+    gap: var(--space-md);
+    position: relative;
+  }
+
+  /*
+   * Kleinerer Cutoff (5em), der Blur startet bereits in der ersten
+   * Zeile von Paragraph 3 ("In der Gruppenausstellung..."). Das Overlay
+   * hat 0 Offset oben, sodass der Blur sofort einsetzt.
+   */
+  .about__body[data-expanded="false"] .about__cutoff {
+    max-height: 5em;
+    overflow: hidden;
+  }
+
+  /*
+   * Multi-Layer-Blur-Overlay: vier Schichten mit progressiv stärkerem
+   * Blur (1–10 px), jeweils auf ihren Höhenbereich gemasked. So wächst
+   * der Blur weich von oben (kaum sichtbar) nach unten (deutlich) an.
+   * Farb-Verlauf liegt als ::after darüber und blendet zum Pink über.
+   */
+  .about__body[data-expanded="false"] .about__cutoff-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .about__body[data-expanded="true"] .about__cutoff-overlay {
+    display: none;
+  }
+
+  .about__body[data-expanded="false"] .about__cutoff-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(231, 40, 103, 0) 0%,
+      rgba(231, 40, 103, 0) 30%,
+      rgba(231, 40, 103, 0.14) 50%,
+      rgba(231, 40, 103, 0.42) 70%,
+      rgba(231, 40, 103, 0.78) 88%,
+      rgba(231, 40, 103, 1) 100%
+    );
+  }
+
+  .about__cutoff-blur {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .about__cutoff-blur[data-strength="1"] {
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 12%,
+      black 30%,
+      transparent 48%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 12%,
+      black 30%,
+      transparent 48%
+    );
+  }
+
+  .about__cutoff-blur[data-strength="2"] {
+    backdrop-filter: blur(2.5px);
+    -webkit-backdrop-filter: blur(2.5px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 22%,
+      black 38%,
+      black 55%,
+      transparent 72%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 22%,
+      black 38%,
+      black 55%,
+      transparent 72%
+    );
+  }
+
+  .about__cutoff-blur[data-strength="3"] {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 48%,
+      black 65%,
+      black 82%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 48%,
+      black 65%,
+      black 82%,
+      transparent 100%
+    );
+  }
+
+  .about__cutoff-blur[data-strength="4"] {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    mask-image: linear-gradient(to bottom, transparent 72%, black 92%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 72%, black 92%);
+  }
+
+  /* ------------------------------------------------------------------
+   * Toggle "Mehr lesen / Weniger anzeigen" — als unterstrichener
+   * Inline-Link gestylt (nicht als Button mit Rahmen). Button-Element
+   * bleibt für Accessibility (keyboard, screen reader), das Styling
+   * macht es optisch zu einem Link.
+   * ------------------------------------------------------------------ */
+
+  .about__toggle {
+    align-self: start;
+    margin-block-start: var(--space-md);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    cursor: pointer;
+    transition: text-decoration-thickness var(--duration-fast) var(--ease-standard);
+  }
+
+  .about__toggle:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .about__toggle:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about__toggle {
+      transition: none;
+    }
+  }
+
+  /*
+   * Auf Desktop ab 75em: About-Body immer voll expandiert. Cutoff-
+   * Truncation, Blur-Overlay und Mehr-lesen-Button werden ausgeblendet.
+   * Diese Regeln stehen bewusst am Ende der About-Styles, damit sie
+   * die früheren Cutoff-Base-Styles überschreiben (gleiche Spezifität
+   * → cascade order entscheidet).
+   */
+  @media (min-width: 75em) {
+    .about__body[data-expanded="false"] .about__cutoff {
+      max-height: none;
+      overflow: visible;
+    }
+
+    .about__body[data-expanded="false"] .about__cutoff-overlay {
+      display: none;
+    }
+
+    .about__toggle {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Video-Sektion, Platzhalter für ein 16:9-Video. Wird später durch
+   * echte Video-Einbettung ersetzt.
+   * ------------------------------------------------------------------ */
+
+  .video {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  /* Natives <video>-Element, 16:9 (das mp4 ist im 16:9-Format
+     gerendert, das Browser-Default-Aspect bleibt). */
+  .video__player {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    background-color: rgba(0, 0, 0, 0.18);
+    /* Object-fit für den seltenen Fall dass das Video nicht exakt
+       16:9 ist — verhindert Letterboxing. */
+    object-fit: cover;
+  }
+
+  /* ------------------------------------------------------------------
+   * Events-Sektion, kommende Veranstaltungen als Liste
+   * ------------------------------------------------------------------ */
+
+  .events {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  /* Section-Headline-Skala (32–56px), konsistent mit anderen Sektionen */
+  .events__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-xl);
+  }
+
+  .events__empty {
+    margin: 0;
+    font-size: var(--text-base);
+    opacity: 0.8;
+  }
+
+  @media (min-width: 48em) {
+    .events__empty {
+      font-size: var(--text-lg);
+    }
+  }
+
+  .events__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-md);
+    max-width: 50rem;
+  }
+
+  .events__list > li + li {
+    margin-block-start: 0;
+  }
+
+  .event {
+    padding-block: var(--space-md) var(--space-lg);
+  }
+
+  /* Base-Text (16px) für Datum, gleicher Stil wie Exhibition-Labels */
+  .event__date {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    opacity: 0.7;
+  }
+
+  /* H3-Skala (20–30px) für Event-Titel */
+  .event__title {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* Body (16px Mobile → 18px Desktop) */
+  .event__description {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  @media (min-width: 48em) {
+    .event__description {
+      font-size: var(--text-lg);
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Kontakt-Sektion, schlanker Block mit E-Mail- und Instagram-Link.
+   * Echtes Formular folgt in Phase 5.
+   * ------------------------------------------------------------------ */
+
+  .contact {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  .contact__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-xl);
+  }
+
+  .contact__intro {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    max-width: 60ch;
+    margin: 0 0 var(--space-xl);
+    opacity: 0.95;
+  }
+
+  @media (min-width: 48em) {
+    .contact__intro {
+      font-size: var(--text-lg);
+    }
+  }
+
+  .contact__list {
+    display: grid;
+    gap: var(--space-md);
+    margin: 0;
+    max-width: 50rem;
+  }
+
+  .contact__row {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .contact__row dt {
+    font-family: var(--font-display);
+    font-weight: var(--weight-medium);
+    font-size: var(--text-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    opacity: 0.7;
+  }
+
+  .contact__row dd {
+    font-size: var(--text-base);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 48em) {
+    .contact__row {
+      grid-template-columns: 12rem 1fr;
+      align-items: baseline;
+      gap: var(--space-lg);
+    }
+
+    .contact__row dd {
+      font-size: var(--text-lg);
+    }
+  }
+
+  .contact__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-thickness var(--duration-fast) var(--ease-standard);
+  }
+
+  .contact__link:hover {
+    text-decoration-thickness: 2px;
+  }
+</style>

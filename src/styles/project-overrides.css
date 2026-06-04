@@ -1,0 +1,161 @@
+/*
+ * Project Overrides: Kleines KaFF
+ *
+ * Überschreibt Template-Defaults aus tokens.css mit den Marken-Werten
+ * für kleines-kaff.de (Platzhalter, Domain eintragen). Diese Datei wird
+ * in BaseLayout.astro NACH tokens.css importiert.
+ *
+ * Marken-Logik: kräftiges Pink als visuelle Bühne, warmes Off-White
+ * als Schrift, tiefes Dunkel als Kontrast-Ebene für Text-dichte Sektionen.
+ *
+ * BARRIEREFREIHEIT: #e9e7da auf #e72867 erreicht ~3.4:1 Kontrast.
+ * Das besteht den WCAG 2.1 AA Large-Text-Test (≥18pt / ≥24px: 3:1),
+ * aber NICHT den Body-Text-Test (<18pt: 4.5:1). Da kein heller Wert
+ * auf diesem Pink 4.5:1 erreichen kann, gilt folgende Strategie:
+ *   – Pink als Fläche für große Headlines und Bildgalerien
+ *   – Kleiner Fließtext (Beschreibungen, Formular, Events) auf dunklen
+ *     Karten-Flächen (--color-bg-dark), wo #e9e7da 14.9:1 erreicht
+ * Diese Entscheidung wurde mit der Auftraggeberin abgestimmt.
+ */
+
+/* ------------------------------------------------------------------
+ * Marken-Schrift Nohemi (Headlines)
+ *
+ * Nohemi-Dateien liegen als woff2 (kleinste Web-Variante) in
+ * public/fonts/. Eingebunden sind die fünf genutzten Schnitte:
+ *   public/fonts/Nohemi-Light.woff2     (weight 300)
+ *   public/fonts/Nohemi-Regular.woff2   (weight 400)
+ *   public/fonts/Nohemi-Medium.woff2    (weight 500)
+ *   public/fonts/Nohemi-SemiBold.woff2  (weight 600)
+ *   public/fonts/Nohemi-Bold.woff2      (weight 700)
+ * font-display: swap hält Text während des Ladens lesbar.
+ * ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: "Nohemi";
+  src: url("/fonts/Nohemi-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nohemi";
+  src: url("/fonts/Nohemi-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nohemi";
+  src: url("/fonts/Nohemi-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nohemi";
+  src: url("/fonts/Nohemi-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nohemi";
+  src: url("/fonts/Nohemi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------
+ * Marken-Schrift Early Access Variable (Fließtext)
+ *
+ * PLATZHALTER: Early Access Variable wird nachgeliefert.
+ * Erwarteter Dateiname: public/fonts/EarlyAccessVariable.woff2
+ * Die Regel unten ist auskommentiert, bis die Datei vorliegt.
+ * Sobald sie eingebunden ist, auch --font-sans weiter unten aktivieren.
+ *
+ * @font-face {
+ *   font-family: "Early Access Variable";
+ *   src: url("/fonts/EarlyAccessVariable.woff2") format("woff2-variations");
+ *   font-weight: 100 900;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* ------------------------------------------------------------------
+   * Farben, Kleines-KaFF-Override
+   *
+   * Kontraste: alle Kombis, die auf dunklen Flächen eingesetzt werden,
+   * erfüllen WCAG 2.1 AA. Für Einsatz auf Pink: nur großer Text (≥24px).
+   * ------------------------------------------------------------------ */
+
+  /* Text */
+  --color-text: #e9e7da; /* Warmes Off-White, ~3.4:1 auf Pink (Large-Text-AA) */
+  --color-text-muted: rgba(233, 231, 218, 0.65); /* Sekundär-Text, gedämpft */
+  --color-text-inverse: #1a0a10; /* Dunkel für Buttons mit hellem Hintergrund */
+
+  /* Hintergrund */
+  --color-bg: #e72867; /* Pink-Rot, Hauptfläche */
+  --color-bg-dark: #1a0a10; /* Tiefes Dunkel für optionale Kontrast-Sektionen */
+  --color-bg-light: #e9e7da; /* Creme als invertierte Sektionsfläche */
+  --color-text-on-light: #e72867; /* Pink als Text auf Creme-Sektionen */
+  --color-surface: rgba(255, 255, 255, 0.08); /* Subtile Karten auf Pink */
+  --color-surface-alt: rgba(255, 255, 255, 0.14); /* Zweite Karten-Ebene */
+
+  /* Rand */
+  --color-border: rgba(233, 231, 218, 0.20);
+  --color-border-strong: rgba(233, 231, 218, 0.45);
+
+  /*
+   * Akzent: auf Pink-Fläche dient Off-White als interaktive Hervorhebung.
+   * --color-accent-contrast ist der Wert für Text auf dem Akzent selbst
+   * (z. B. gefüllter Button: Off-White-Fläche, Pink als Text).
+   */
+  --color-accent: #e9e7da;
+  --color-accent-contrast: #e72867;
+
+  /*
+   * Fokus-Ring: Weiss ist auf Pink und auf Dunkel gut sichtbar.
+   * Kontrast weiss/#e72867 ≈ 4.2:1, weiss/#1a0a10 ≈ 18.6:1.
+   */
+  --color-focus: #ffffff;
+
+  /* Pressed-Overlay: dunkle, transparente Schicht auf Pink-Fläche */
+  --color-overlay-pressed: rgba(0, 0, 0, 0.12);
+
+  /*
+   * Duotone-Lila: zweite Farbe für den SVG-Duotone-Filter auf Galerie-
+   * Bildern. Schwarz im Bild wird auf diese Lila-Farbe gemappt, Weiss
+   * auf --color-bg (Pink). So entsteht der Plakat-Look. Beim Hover
+   * oder Klick wird der Filter entfernt, das Bild zeigt seine Farbe.
+   */
+  --color-duotone-shadow: #6d1b9f;
+
+  /* ------------------------------------------------------------------
+   * Typografie, Marken-Schriften
+   *
+   * --font-display: Nohemi für h1–h6, gesetzt in global.css.
+   * --font-sans: Fallback bis Early Access Variable nachgeliefert wird.
+   *   Sobald die Datei vorliegt: "Early Access Variable" als ersten
+   *   Wert eintragen und @font-face oben auskommentieren.
+   * ------------------------------------------------------------------ */
+
+  --font-display: "Nohemi", system-ui, -apple-system, sans-serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* --font-sans: "Early Access Variable", system-ui, -apple-system, sans-serif; */
+}
+
+/*
+ * color-scheme auf light setzen: Browser-Scrollbars und native Form-
+ * Elemente sollen zur hellen, pinkfarbenen Oberfläche passen.
+ */
+html {
+  color-scheme: light;
+}

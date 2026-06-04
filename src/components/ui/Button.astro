@@ -1,0 +1,189 @@
+---
+/**
+ * Button
+ *
+ * Interaktions-Button. Rendert immer ein echtes <button>-Element.
+ * Für Navigationslinks mit Button-Optik bitte die Link-Komponente
+ * mit einer eigenen Variante nutzen, nicht diesen Button als Link
+ * zweckentfremden (Accessibility-Baseline: Buttons tun etwas,
+ * Links navigieren).
+ */
+
+import type { HTMLAttributes } from "astro/types";
+
+/** Visuelle Variante. */
+type ButtonVariant = "primary" | "secondary" | "ghost";
+
+/** Größe, steuert Padding und Schriftgröße. */
+type ButtonSize = "sm" | "md" | "lg";
+
+interface Props extends HTMLAttributes<"button"> {
+  /** Visuelle Variante. Default "primary". */
+  variant?: ButtonVariant;
+  /** Größe. Default "md". */
+  size?: ButtonSize;
+  /**
+   * Ladezustand. Wenn true: Button bleibt sichtbar, wird deaktiviert,
+   * bekommt aria-busy und zeigt einen Spinner neben dem Slot-Inhalt.
+   * Default false.
+   */
+  loading?: boolean;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  // Explizites Default: verhindert, dass der Button in einem Form
+  // ungewollt als Submit-Button interpretiert wird.
+  type = "button",
+  loading = false,
+  disabled,
+  class: extraClass,
+  ...rest
+} = Astro.props;
+
+// Während des Ladens ist der Button nicht klickbar, auch wenn
+// disabled nicht explizit gesetzt wurde. Verhindert Doppel-Submits.
+const isDisabled = disabled || loading;
+---
+
+<button
+  type={type}
+  class:list={["button", `button--${variant}`, `button--${size}`, extraClass]}
+  disabled={isDisabled}
+  aria-busy={loading || undefined}
+  {...rest}
+>
+  <span class="button__content">
+    <slot />
+  </span>
+  {loading && <span class="button__spinner" aria-hidden="true" />}
+</button>
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2xs);
+    min-height: var(--touch-target-min);
+    font-family: var(--font-sans);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-normal);
+    border: 1px solid transparent;
+    /*
+     * Studio-Default: weiche Pill-artige Rundung (40px). Spiegelt
+     * radius/xl in der Figma-Library. Pro Kunde überschreibbar via
+     * project-overrides.css, falls eckigere Buttons gewünscht sind.
+     */
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+
+  /*
+   * Expliziter Focus-Ring, überschreibt das globale :focus-visible
+   * aus global.css mit Button-spezifischem Offset.
+   */
+  .button:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /*
+   * Active-Overlay als linear-gradient über den Button-Hintergrund.
+   * Funktioniert variant-übergreifend, ohne pro Variante eine eigene
+   * Active-Farbe zu definieren. Nicht aktiv bei disabled.
+   */
+  .button:not(:disabled):active {
+    background-image: linear-gradient(var(--color-overlay-pressed), var(--color-overlay-pressed));
+  }
+
+  /* Größen */
+  .button--sm {
+    padding: var(--space-2xs) var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  .button--md {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-base);
+  }
+
+  .button--lg {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-lg);
+  }
+
+  /* Varianten */
+  .button--primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+    border-color: var(--color-accent);
+  }
+
+  .button--primary:hover:not(:disabled) {
+    background-color: var(--color-text);
+    border-color: var(--color-text);
+  }
+
+  .button--secondary {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
+  }
+
+  .button--secondary:hover:not(:disabled) {
+    background-color: var(--color-surface);
+  }
+
+  .button--ghost {
+    background-color: transparent;
+    color: var(--color-text);
+    border-color: transparent;
+  }
+
+  .button--ghost:hover:not(:disabled) {
+    background-color: var(--color-surface);
+  }
+
+  /* ------------------------------------------------------------------
+   * Loading-State
+   *
+   * Der Slot-Inhalt wird optisch zurückgenommen, der Spinner übernimmt
+   * die visuelle Hauptrolle. Der Button bleibt in seiner Größe, damit
+   * das Layout nicht springt. Für prefers-reduced-motion friert der
+   * Spinner über das globale Reset ein, aria-busy signalisiert den
+   * Zustand weiterhin an Screenreader.
+   * ------------------------------------------------------------------ */
+
+  .button[aria-busy="true"] .button__content {
+    opacity: 0.5;
+  }
+
+  .button__spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-spin 0.8s linear infinite;
+  }
+
+  @keyframes button-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+</style>

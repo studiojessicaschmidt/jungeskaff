@@ -1,0 +1,100 @@
+---
+/**
+ * Image
+ *
+ * Produktiv-Komponente für echte Bilder. Akzeptiert lokale Pfade
+ * (z. B. /images/foo.jpg aus public/) sowie Sanity-CDN-URLs
+ * (https://cdn.sanity.io/...).
+ *
+ * Verhalten:
+ * - Bei Sanity-CDN-URL: srcset wird automatisch generiert (400, 800,
+ *   1200, 1600 px) plus auto=format und q=75. Sanity liefert WebP/AVIF
+ *   ausgehandelt.
+ * - Bei lokalem Pfad: kein srcset, der Browser nimmt direkt src.
+ *   Das Kundenprojekt muss die Bilder vorab in passender Größe
+ *   bereitstellen (siehe component-patterns.md).
+ * - width und height sind Pflicht: das Browser-Layout reserviert den
+ *   Platz vor dem Bild-Load (CLS-Schutz).
+ * - alt ist Pflicht: leere Strings sind erlaubt für rein dekorative
+ *   Bilder, dann zusätzlich role="presentation" außerhalb der
+ *   Komponente setzen oder bewusst leer lassen.
+ * - priority=true setzt loading=eager und fetchpriority=high. Für
+ *   Above-the-Fold-Bilder, z. B. Hero. Default lazy.
+ *
+ * Solange noch kein echtes Bild vorliegt, weiterhin ImagePlaceholder
+ * verwenden. Image ist die Produktiv-Komponente, ImagePlaceholder
+ * der sichtbare Platzhalter im Briefing- und Wireframe-Stadium.
+ */
+
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends Omit<HTMLAttributes<"img">, "loading" | "decoding"> {
+  /** Bild-Quelle. Lokaler Pfad oder Sanity-CDN-URL. */
+  src: string;
+  /** Alternativ-Text, Pflicht. Leerstring für rein dekorative Bilder. */
+  alt: string;
+  /** Bild-Breite in Pixeln, Pflicht (CLS-Schutz). */
+  width: number;
+  /** Bild-Höhe in Pixeln, Pflicht (CLS-Schutz). */
+  height: number;
+  /** Lade-Strategie. Default lazy, priority überschreibt. */
+  loading?: "lazy" | "eager";
+  /** Decoding-Strategie. Default async. */
+  decoding?: "async" | "sync" | "auto";
+  /**
+   * sizes-Attribut für responsive Auswahl aus dem srcset.
+   * Default 100vw, in der Praxis pro Layout-Slot anpassen
+   * (z. B. "(min-width: 48em) 50vw, 100vw").
+   */
+  sizes?: string;
+  /**
+   * Above-the-Fold-Bild. Setzt loading=eager und fetchpriority=high.
+   * Pro Seite höchstens einmal sinnvoll (Hero-Bild).
+   */
+  priority?: boolean;
+}
+
+const SANITY_CDN_PREFIX = "https://cdn.sanity.io/";
+const SRCSET_WIDTHS = [400, 800, 1200, 1600];
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  loading,
+  decoding = "async",
+  sizes = "100vw",
+  priority = false,
+  ...rest
+} = Astro.props;
+
+// Sanity-CDN-URLs erkennen und srcset generieren.
+const isSanity = src.startsWith(SANITY_CDN_PREFIX);
+
+const buildSanityUrl = (url: string, w: number): string => {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}w=${w}&auto=format&q=75`;
+};
+
+const srcset = isSanity
+  ? SRCSET_WIDTHS.map((w) => `${buildSanityUrl(src, w)} ${w}w`).join(", ")
+  : undefined;
+
+// Bei priority eager und hohe Fetch-Priorität, sonst lazy.
+const effectiveLoading = loading ?? (priority ? "eager" : "lazy");
+const fetchpriority = priority ? "high" : undefined;
+---
+
+<img
+  src={src}
+  srcset={srcset}
+  sizes={isSanity ? sizes : undefined}
+  alt={alt}
+  width={width}
+  height={height}
+  loading={effectiveLoading}
+  decoding={decoding}
+  fetchpriority={fetchpriority}
+  {...rest}
+/>

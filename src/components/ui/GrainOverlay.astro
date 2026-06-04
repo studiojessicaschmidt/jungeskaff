@@ -1,0 +1,47 @@
+---
+/**
+ * GrainOverlay
+ *
+ * Marken-Körnung als statisches PNG-Tile, gelegt über den Eltern-Container
+ * via mix-blend-mode: screen. Identisches visuelles Ergebnis wie der
+ * JS-Canvas-Grain auf der bestehenden studiojessicaschmidt.de, aber ohne
+ * JavaScript und ohne Repaint-Loop.
+ *
+ * Nutzung: in eine Section einsetzen, deren Eltern-Element position:
+ * relative trägt. Default-Stärke 0.09 entspricht der bestehenden Seite.
+ */
+
+interface Props {
+  /** Stärke der Körnung, 0 bis 1. Default 0.09. */
+  opacity?: number;
+  /**
+   * CSS mix-blend-mode. "screen" für dunkle Hintergründe (Default),
+   * "multiply" oder "overlay" für helle / bunte Hintergründe.
+   */
+  blendMode?: string;
+  /** Optional Klasse, falls die Konsumierende positionieren oder z-index ändern will. */
+  class?: string;
+}
+
+const { opacity = 0.09, blendMode = "screen", class: className } = Astro.props;
+---
+
+<div
+  class:list={["grain-overlay", className]}
+  style={`--grain-opacity: ${opacity}; --grain-blend: ${blendMode};`}
+  aria-hidden="true"
+></div>
+
+<style>
+  .grain-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend, screen);
+    background-image: url("/images/grain.png");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+  }
+</style>

@@ -1,0 +1,448 @@
+---
+/**
+ * GallerySection
+ *
+ * Galerie der Vernissage-Fotos im Duotone-Look (Pink/Lila).
+ * Hover oder Touch entfernt den Filter, das Bild erscheint in
+ * Originalfarbe. Klick öffnet die Lightbox (Lightbox.astro im
+ * BaseLayout) mit der Originalfarbe und Pfeil-Navigation.
+ *
+ * Standardansicht: die ersten 8 Fotos vollständig, die nächsten 4
+ * als angeschnittene Vorschau mit Blur. Über den Button "Alle Bilder
+ * ansehen" wird die Galerie aufgeklappt und zeigt alle Fotos.
+ *
+ * Bilder-Quelle: src/assets/vernissage/*.jpg
+ * Astro <Image> sorgt für responsive srcset und WebP zur Build-Zeit.
+ * import.meta.glob liest alle Dateien beim Build ein, sodass neue
+ * Fotos automatisch erscheinen sobald sie im Ordner liegen.
+ */
+
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import Container from "../ui/Container.astro";
+
+interface Props {
+  /** Überschrift der Sektion */
+  heading: string;
+  /** Optionaler Hinweis (z. B. "Tippen oder bewegen für Farbe") */
+  hint?: string;
+  /** Button-Text wenn die Galerie zugeklappt ist */
+  expandLabel: string;
+  /** Button-Text wenn die Galerie aufgeklappt ist */
+  collapseLabel: string;
+}
+
+const { heading, hint, expandLabel, collapseLabel } = Astro.props;
+
+/*
+ * Alle Vernissage-Fotos zur Build-Zeit einlesen, alphabetisch sortieren
+ * (Dateinamen sind nummeriert, also entspricht alphabetisch chronologisch).
+ */
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "../../assets/vernissage/*.jpg",
+  { eager: true }
+);
+
+const images = Object.entries(imageModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, mod]) => ({
+    src: mod.default,
+    name: path.split("/").pop()?.replace(".jpg", "") ?? "",
+  }));
+
+/*
+ * Aufklapp-Schwelle wird per CSS pro Breakpoint gesetzt (siehe :nth-child
+ * im <style>-Block):
+ *   Mobile  (<48em): 4 Items  (1 voll + 1 Fade-Reihe à 2 Spalten)
+ *   Tablet  (48em+): 9 Items  (2 voll + 1 Fade-Reihe à 3 Spalten)
+ *   Desktop (75em+): 12 Items (2 voll + 1 Fade-Reihe à 4 Spalten)
+ * Im DOM stehen weiterhin alle 48 Items, damit die Lightbox sie kennt.
+ */
+---
+
+<section id="galerie" class="gallery" aria-labelledby="gallery-heading">
+  <Container size="default">
+    <h2 id="gallery-heading" class="gallery__heading">{heading}</h2>
+    {hint && <p class="gallery__hint">{hint}</p>}
+
+    <div class="gallery__container" data-collapsible data-expanded="false">
+      <div class="gallery__grid-wrap">
+        <ul class="gallery__grid" role="list">
+          {
+            images.map((image, index) => (
+              <li class="gallery__item">
+                <button
+                  type="button"
+                  class="gallery__trigger"
+                  data-gallery-trigger
+                  data-index={index}
+                  aria-label={`Foto ${index + 1} öffnen`}
+                >
+                  <figure class="gallery__figure">
+                    <Image
+                      class="gallery__image"
+                      src={image.src}
+                      alt={`Vernissage Junges KaFF, Foto ${index + 1}`}
+                      widths={[400, 800, 1200]}
+                      sizes="(min-width: 75em) 25vw, (min-width: 48em) 33vw, 50vw"
+                      loading={index < 4 ? "eager" : "lazy"}
+                    />
+                  </figure>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+
+        {/* Fade-Overlay aus mehreren Blur-Schichten, die progressiv stärker
+            werden. Jede Schicht ist auf ihren Höhenbereich gemasked, sodass
+            der Blur von oben (0 px) nach unten (~16 px) sanft anwächst.
+            Die Farbgradient kommt erst weiter unten dazu. */}
+        <div class="gallery__fade-overlay" aria-hidden="true">
+          <div class="gallery__fade-blur" data-strength="1"></div>
+          <div class="gallery__fade-blur" data-strength="2"></div>
+          <div class="gallery__fade-blur" data-strength="3"></div>
+          <div class="gallery__fade-blur" data-strength="4"></div>
+        </div>
+      </div>
+
+      <div class="gallery__toggle-wrap">
+        <button
+          type="button"
+          class="gallery__toggle"
+          data-collapsible-trigger
+          data-label-collapsed={expandLabel}
+          data-label-expanded={collapseLabel}
+          aria-expanded="false"
+        >
+          <span data-label>{expandLabel}</span>
+        </button>
+      </div>
+    </div>
+  </Container>
+</section>
+
+<script>
+  import "../../scripts/collapsible";
+</script>
+
+<style>
+  .gallery {
+    position: relative;
+    z-index: 2;
+    padding-block: var(--space-3xl);
+  }
+
+  /* Section-Headline-Skala (32–56px), konsistent mit anderen Sektionen */
+  .gallery__heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-md);
+  }
+
+  /* Body Standard (16px) */
+  .gallery__hint {
+    margin: 0 0 var(--space-xl);
+    opacity: 0.85;
+    font-size: var(--text-base);
+    font-style: italic;
+    max-width: 65ch;
+  }
+
+  /* ------------------------------------------------------------------
+   * Grid: 2 Spalten mobil, 3 ab Tablet, 4 ab Desktop.
+   * ------------------------------------------------------------------ */
+
+  .gallery__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2xs);
+  }
+
+  .gallery__item + .gallery__item {
+    margin-block-start: 0;
+  }
+
+  @media (min-width: 48em) {
+    .gallery__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+    }
+  }
+
+  @media (min-width: 75em) {
+    .gallery__grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+    }
+  }
+
+  .gallery__item {
+    margin: 0;
+  }
+
+  /* ------------------------------------------------------------------
+   * Collapsed-State pro Breakpoint:
+   *   Mobile  (< 48em): 4 Items  (1 voll + 1 Fade-Reihe à 2 Spalten)
+   *   Tablet  (48em+):  9 Items  (2 voll + 1 Fade-Reihe à 3 Spalten)
+   *   Desktop (75em+):  12 Items (2 voll + 1 Fade-Reihe à 4 Spalten)
+   * Items im DOM bleiben für die Lightbox alle vorhanden, nur Anzeige
+   * ist per CSS pro Breakpoint gesteuert.
+   * ------------------------------------------------------------------ */
+
+  /* Mobile-Default: alles ausblenden, dann die ersten 4 wieder einblenden */
+  .gallery__container[data-expanded="false"] .gallery__item {
+    display: none;
+  }
+
+  .gallery__container[data-expanded="false"] .gallery__item:nth-child(-n + 4) {
+    display: list-item;
+  }
+
+  /* Tablet: ersten 9 Items sichtbar */
+  @media (min-width: 48em) {
+    .gallery__container[data-expanded="false"] .gallery__item:nth-child(-n + 9) {
+      display: list-item;
+    }
+    .gallery__container[data-expanded="false"] .gallery__item:nth-child(n + 10) {
+      display: none;
+    }
+  }
+
+  /* Desktop: ersten 8 Items sichtbar (= 2 Reihen à 4 Spalten, davon
+     die zweite mit Blur/Fade) */
+  @media (min-width: 75em) {
+    .gallery__container[data-expanded="false"] .gallery__item:nth-child(-n + 8) {
+      display: list-item;
+    }
+    .gallery__container[data-expanded="false"] .gallery__item:nth-child(n + 9) {
+      display: none;
+    }
+  }
+
+  .gallery__grid-wrap {
+    position: relative;
+  }
+
+  /* ------------------------------------------------------------------
+   * Fade-Overlay
+   *
+   * Liegt am unteren Rand des Grids. Besteht aus zwei Teilen:
+   *  1. Mehrere Blur-Schichten (gallery__fade-blur) mit progressiv
+   *     stärkerem Blur, jeweils auf ihren Höhenbereich gemasked.
+   *     Dadurch wächst die Blur-Stärke weich von oben (0 px) nach
+   *     unten (~16 px) an, statt einer harten Kante.
+   *  2. Ein Farb-Gradient als ::after, der die untere Hälfte zur
+   *     Hintergrund-Farbe (Pink) überblendet.
+   *
+   * Höhe pro Breakpoint:
+   *   Mobile  ~120px (Tile-Höhe ~230px)
+   *   Tablet  ~200px (Tile-Höhe ~280px)
+   *   Desktop ~300px (Tile-Höhe ~370px)
+   * ------------------------------------------------------------------ */
+
+  .gallery__fade-overlay {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    height: 120px;
+    pointer-events: none;
+  }
+
+  @media (min-width: 48em) {
+    .gallery__fade-overlay {
+      height: 200px;
+    }
+  }
+
+  @media (min-width: 75em) {
+    .gallery__fade-overlay {
+      height: 300px;
+    }
+  }
+
+  /* Farb-Verlauf zum Hintergrund, nur in unterer Hälfte aktiv */
+  .gallery__fade-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(231, 40, 103, 0) 0%,
+      rgba(231, 40, 103, 0) 35%,
+      rgba(231, 40, 103, 0.12) 55%,
+      rgba(231, 40, 103, 0.4) 72%,
+      rgba(231, 40, 103, 0.78) 88%,
+      rgba(231, 40, 103, 1) 100%
+    );
+  }
+
+  /* Blur-Schichten, jeweils auf ein Höhenband gemasked */
+  .gallery__fade-blur {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .gallery__fade-blur[data-strength="1"] {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 18%,
+      black 35%,
+      transparent 55%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 18%,
+      black 35%,
+      transparent 55%
+    );
+  }
+
+  .gallery__fade-blur[data-strength="2"] {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 25%,
+      black 42%,
+      black 60%,
+      transparent 80%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 25%,
+      black 42%,
+      black 60%,
+      transparent 80%
+    );
+  }
+
+  .gallery__fade-blur[data-strength="3"] {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 50%,
+      black 68%,
+      black 85%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 50%,
+      black 68%,
+      black 85%,
+      transparent 100%
+    );
+  }
+
+  .gallery__fade-blur[data-strength="4"] {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    mask-image: linear-gradient(to bottom, transparent 72%, black 92%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 72%, black 92%);
+  }
+
+  /* Aufgeklappt: Overlay verschwindet, alle Bilder sichtbar */
+  .gallery__container[data-expanded="true"] .gallery__fade-overlay {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
+   * Trigger-Button (umschliesst jedes Bild) und Bild
+   * ------------------------------------------------------------------ */
+
+  .gallery__trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+  }
+
+  .gallery__trigger:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .gallery__figure {
+    margin: 0;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: var(--color-duotone-shadow);
+  }
+
+  .gallery__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: url(#duotone-purple);
+    transition: filter var(--duration-medium) var(--ease-standard);
+  }
+
+  /* Hover / Tap / Fokus: Filter weg, Originalfarbe */
+  .gallery__trigger:hover .gallery__image,
+  .gallery__trigger:focus-visible .gallery__image {
+    filter: none;
+  }
+
+  /* prefers-reduced-motion respektieren */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery__image {
+      transition: none;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Toggle "Alle Bilder ansehen" — als unterstrichener Inline-Link
+   * gestylt (analog zu .about__toggle). Button-Element bleibt für
+   * Accessibility, das Styling macht es optisch zu einem Link.
+   * ------------------------------------------------------------------ */
+
+  .gallery__toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin-block-start: var(--space-xl);
+  }
+
+  .gallery__toggle {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    cursor: pointer;
+    transition: text-decoration-thickness var(--duration-fast) var(--ease-standard);
+  }
+
+  .gallery__toggle:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .gallery__toggle:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+</style>

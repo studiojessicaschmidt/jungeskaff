@@ -1,0 +1,178 @@
+---
+/**
+ * Header
+ *
+ * Seiten-Kopf mit Text-Wortmarke und Primär-Navigation. Responsive:
+ * auf kleinen Viewports ist die Navigation hinter einem Toggle-Button
+ * versteckt, auf größeren Viewports ist sie immer sichtbar.
+ *
+ * Navigations-Einträge werden als Prop übergeben, damit pro Seite oder
+ * Kundenprojekt unterschiedliche Menüs möglich sind, ohne diese
+ * Komponente zu verändern. Default-Einträge decken die üblichen vier
+ * Top-Level-Seiten ab und sind als sichtbare Platzhalter formuliert.
+ *
+ * Interaktivität: siehe src/scripts/header-nav.ts. HTML, CSS und JS
+ * bleiben strikt getrennt.
+ */
+
+import Container from "../ui/Container.astro";
+
+interface NavItem {
+  /** Sichtbarer Link-Text. */
+  label: string;
+  /** Ziel-URL. Bei leerem Kundenprojekt auf "#" setzen. */
+  href: string;
+}
+
+interface Props {
+  /** Sichtbarer Markenname im Header. Default ist ein sichtbarer Platzhalter. */
+  brandName?: string;
+  /** Ziel-URL der Wortmarke. Default Startseite. */
+  brandHref?: string;
+  /** Navigations-Einträge. Default vier neutrale Top-Level-Seiten. */
+  navItems?: readonly NavItem[];
+}
+
+// Default-Einträge zeigen auf Platzhalter-Routen, die im Template
+// absichtlich nicht alle als Seiten existieren. Nur "/" ist umgesetzt.
+// Im Kundenprojekt vor Go-Live durch reale Seiten ersetzen. Die
+// Handoff-Checkliste (Einheit 6) und PROJECT_SETUP.md (Einheit 8)
+// enthalten dazu einen Checkpunkt.
+const defaultNav: readonly NavItem[] = [
+  { label: "Start", href: "/" },
+  { label: "Über", href: "/ueber" },
+  { label: "Leistungen", href: "/leistungen" },
+  { label: "Kontakt", href: "/kontakt" },
+];
+
+const { brandName = "[KUNDE: Markenname]", brandHref = "/", navItems = defaultNav } = Astro.props;
+---
+
+<header class="site-header">
+  <Container as="div" size="default" class="site-header__inner">
+    <a class="site-header__brand" href={brandHref}>{brandName}</a>
+
+    <nav class="site-header__nav" aria-label="Hauptnavigation">
+      <ul class="site-header__list">
+        {
+          navItems.map((item) => (
+            <li class="site-header__item">
+              <a class="site-header__link" href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </Container>
+</header>
+
+<script>
+  import "../../scripts/header-active";
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-sticky);
+    background-color: transparent;
+    color: var(--color-text);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: var(--space-sm);
+  }
+
+  .site-header__brand {
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
+    text-decoration: none;
+    /* Pinker Shadow in Hintergrund-Farbe, damit der Text auch über
+       beige Inhalte (Headings) gut lesbar bleibt. Mehrere Layers für
+       sanftere Umrandung. */
+    text-shadow:
+      0 0 12px var(--color-bg),
+      0 0 12px var(--color-bg),
+      0 0 12px var(--color-bg),
+      0 0 24px var(--color-bg),
+      0 0 40px var(--color-bg),
+      0 0 60px var(--color-bg);
+  }
+
+  .site-header__brand:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* ------------------------------------------------------------------
+   * Navigation — auf allen Breakpoints sichtbar (Onepager, kein
+   * Burger-Menü). Auf Mobile horizontal, eng gepackt; ab Tablet mit
+   * grösserem Abstand.
+   * ------------------------------------------------------------------ */
+
+  .site-header__nav {
+    display: block;
+  }
+
+  .site-header__list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-header__item + .site-header__item {
+    margin-block-start: 0;
+  }
+
+  .site-header__link {
+    display: inline-block;
+    padding-block: var(--space-2xs);
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: var(--weight-medium);
+    font-size: var(--text-base);
+    transition: font-weight var(--duration-fast) var(--ease-standard);
+    /* Pinker Shadow für bessere Lesbarkeit über beige Inhalten. */
+    text-shadow:
+      0 0 12px var(--color-bg),
+      0 0 12px var(--color-bg),
+      0 0 12px var(--color-bg),
+      0 0 24px var(--color-bg),
+      0 0 40px var(--color-bg),
+      0 0 60px var(--color-bg);
+  }
+
+  .site-header__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Active-State: das header-active.ts-Skript setzt data-active="true"
+     auf dem Link, dessen Section gerade im Viewport ist. */
+  .site-header__link[data-active="true"] {
+    font-weight: var(--weight-bold);
+  }
+
+  @media (min-width: 48em) {
+    .site-header__list {
+      gap: var(--space-md);
+    }
+
+    .site-header__link {
+      font-size: var(--text-lg);
+    }
+  }
+</style>
