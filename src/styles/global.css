@@ -12,6 +12,11 @@ html {
   /* Browser-Default respektieren (Accessibility-Baseline). */
   font-size: 100%;
   color-scheme: light;
+  /* Horizontalen Überlauf abschneiden (z. B. angeschnittene Hero-Cutouts,
+     die per clip-path zwar visuell, aber nicht in der Scrollbreite
+     beschnitten werden). "clip" statt "hidden", damit kein Scroll-Container
+     entsteht und position: sticky am Header weiter funktioniert. */
+  overflow-x: clip;
 }
 
 body {

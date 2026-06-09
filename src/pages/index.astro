@@ -282,13 +282,14 @@ function formatEventDate(isoDate: string): string {
     align-items: center;
     padding-block: var(--space-3xl) var(--space-2xl);
     /*
-     * clip-path statt overflow: hidden, damit der top-left Cutout nach
-     * oben in den Header-Bereich ragen darf (negativer inset-block-start).
-     * Oben 300px Überlauf erlaubt, links/rechts/unten geclippt. Die Navbar-
-     * Texte liegen durch den hohen z-index des sticky Headers automatisch
-     * über dem Cutout.
+     * overflow: clip visible = horizontal abschneiden, vertikal sichtbar
+     * lassen. So wird das angeschnittene Kind-Cutout am rechten Rand
+     * sauber geclippt UND bläht die Layout-/Scrollbreite nicht auf
+     * (kein horizontaler Überlauf-Streifen beim Rauszoomen), während der
+     * top-left Cutout weiter nach oben in den Header-Bereich ragen darf.
      */
-    clip-path: inset(-300px 0 0 0);
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   .hero__inner {
