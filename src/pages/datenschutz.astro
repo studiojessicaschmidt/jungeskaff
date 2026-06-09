@@ -2,10 +2,16 @@
 /*
  * Datenschutzerklärung
  *
- * Pflicht-Seite nach DSGVO. Inhaltlich absichtlich leer, weil der
- * Text auf die tatsächlich eingesetzten Dienste dieser Website
- * zugeschnitten sein muss (Hoster, Fonts, Analyse, Cookies,
- * Formulare, CDN). Der Platzhalter-Text macht das deutlich.
+ * Zugeschnitten auf die tatsächlich eingesetzten Dienste dieser Website:
+ * - Hosting über GitHub Pages (GitHub Inc., USA) inkl. Server-Logfiles
+ * - Kontaktaufnahme per E-Mail
+ * - KEINE Cookies, KEIN Tracking, KEINE Analyse-Tools, KEINE eingebetteten
+ *   Drittinhalte (Schriften und Video werden lokal ausgeliefert)
+ *
+ * Hinweis: Dieser Text deckt den aktuellen technischen Stand der Website
+ * ab. Sobald Dienste hinzukommen (z. B. ein Kontaktformular über einen
+ * Drittanbieter, eingebettete Karten, Analyse), muss die Erklärung
+ * ergänzt werden. Eine juristische Prüfung wird empfohlen.
  */
 
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -13,16 +19,124 @@ import Container from "../components/ui/Container.astro";
 import Heading from "../components/ui/Heading.astro";
 ---
 
-<BaseLayout title="Datenschutz, [KUNDE: Markenname]" description="Datenschutzerklärung nach DSGVO.">
+<BaseLayout
+  title="Datenschutz, Junges KaFF"
+  description="Datenschutzerklärung nach DSGVO für die Website jungeskaff.de."
+>
   <section class="section" aria-labelledby="datenschutz-heading">
     <Container size="narrow">
       <Heading level={1} id="datenschutz-heading">Datenschutzerklärung</Heading>
-      <p>
-        [KUNDE: Datenschutzerklärung hier einfügen. Eine DSGVO-konforme Erklärung muss auf die
-        tatsächlich eingesetzten Dienste, Analyse-Tools, Cookies, Hoster und Formulare dieser
-        Website zugeschnitten sein und sollte von einer Fachperson erstellt oder geprüft werden.
-        Diese Seite ist bewusst nicht vorausgefüllt.]
+
+      <p class="datenschutz__block">
+        Wir freuen uns über dein Interesse an unserer Website. Der Schutz deiner
+        personenbezogenen Daten ist uns wichtig. Nachfolgend informieren wir dich
+        darüber, welche Daten beim Besuch dieser Website verarbeitet werden.
       </p>
+
+      {/* Verantwortlicher nach Art. 4 Nr. 7 DSGVO */}
+      <h2 class="datenschutz__subheading">Verantwortlicher</h2>
+      <p class="datenschutz__block">
+        Verantwortlich für die Datenverarbeitung auf dieser Website ist:<br />
+        Chantal Knickmeyer (Junges KaFF)<br />
+        In d. Bredenau 83<br />
+        28870 Ottersberg-Fischerhude<br />
+        E-Mail: <a href="mailto:info@jungeskaff.de">info@jungeskaff.de</a>
+      </p>
+
+      {/* Hosting / Server-Logfiles */}
+      <h2 class="datenschutz__subheading">Hosting und Server-Logfiles</h2>
+      <p class="datenschutz__block">
+        Diese Website wird bei GitHub Pages gehostet, einem Dienst der GitHub,
+        Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA.
+      </p>
+      <p class="datenschutz__block">
+        Beim Aufruf der Website werden durch den Hoster automatisch Informationen
+        in sogenannten Server-Logfiles erfasst, die dein Browser übermittelt.
+        Dies sind:
+      </p>
+      <ul class="datenschutz__list">
+        <li>die IP-Adresse des anfragenden Geräts,</li>
+        <li>Datum und Uhrzeit des Zugriffs,</li>
+        <li>Name und URL der abgerufenen Datei,</li>
+        <li>die Website, von der aus der Zugriff erfolgt (Referrer),</li>
+        <li>verwendeter Browser und Betriebssystem.</li>
+      </ul>
+      <p class="datenschutz__block">
+        Die Verarbeitung dieser Daten erfolgt zur Gewährleistung eines
+        störungsfreien Betriebs und der Sicherheit der Website. Rechtsgrundlage
+        ist unser berechtigtes Interesse nach Art. 6 Abs. 1 lit. f DSGVO.
+      </p>
+      <p class="datenschutz__block">
+        Da GitHub Pages von einem Anbieter mit Sitz in den USA betrieben wird,
+        kann es zu einer Übermittlung personenbezogener Daten in die USA kommen.
+        GitHub stützt diese Übermittlung auf die Standardvertragsklauseln der
+        EU-Kommission. Weitere Informationen findest du in der Datenschutzerklärung
+        von GitHub:
+        <a
+          href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement"
+          target="_blank"
+          rel="noopener noreferrer">GitHub General Privacy Statement</a
+        >.
+      </p>
+
+      {/* Kontaktaufnahme */}
+      <h2 class="datenschutz__subheading">Kontaktaufnahme per E-Mail</h2>
+      <p class="datenschutz__block">
+        Wenn du uns per E-Mail kontaktierst, verarbeiten wir die von dir
+        mitgeteilten Daten (z. B. Name, E-Mail-Adresse und den Inhalt deiner
+        Nachricht), um deine Anfrage zu beantworten. Rechtsgrundlage ist Art. 6
+        Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung) bzw.
+        Art. 6 Abs. 1 lit. b DSGVO, sofern es um die Anbahnung oder Abwicklung
+        eines Vertrags geht. Wir löschen diese Daten, sobald sie für den Zweck
+        nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungspflichten
+        entgegenstehen.
+      </p>
+
+      {/* Keine Cookies / kein Tracking */}
+      <h2 class="datenschutz__subheading">Cookies, Analyse und Tracking</h2>
+      <p class="datenschutz__block">
+        Diese Website verwendet keine Cookies, kein Tracking und keine Analyse-
+        oder Statistik-Dienste. Es werden keine Profile über dein Verhalten
+        erstellt. Schriften und Videos werden direkt von dieser Website
+        ausgeliefert, es werden keine Inhalte von Drittanbietern (z. B. externe
+        Schriftdienste, Karten oder Social-Media-Plugins) nachgeladen.
+      </p>
+
+      {/* Betroffenenrechte */}
+      <h2 class="datenschutz__subheading">Deine Rechte</h2>
+      <p class="datenschutz__block">
+        Dir stehen nach der DSGVO folgende Rechte hinsichtlich deiner
+        personenbezogenen Daten zu:
+      </p>
+      <ul class="datenschutz__list">
+        <li>Recht auf Auskunft (Art. 15 DSGVO),</li>
+        <li>Recht auf Berichtigung (Art. 16 DSGVO),</li>
+        <li>Recht auf Löschung (Art. 17 DSGVO),</li>
+        <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO),</li>
+        <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO),</li>
+        <li>Recht auf Widerspruch gegen die Verarbeitung (Art. 21 DSGVO).</li>
+      </ul>
+      <p class="datenschutz__block">
+        Zur Ausübung deiner Rechte genügt eine formlose Nachricht an die oben
+        genannte E-Mail-Adresse.
+      </p>
+
+      {/* Beschwerderecht Aufsichtsbehörde */}
+      <h2 class="datenschutz__subheading">Beschwerderecht bei der Aufsichtsbehörde</h2>
+      <p class="datenschutz__block">
+        Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu
+        beschweren. Die für uns zuständige Behörde ist:
+      </p>
+      <p class="datenschutz__block">
+        Die Landesbeauftragte für den Datenschutz Niedersachsen<br />
+        Prinzenstraße 5<br />
+        30159 Hannover<br />
+        <a href="https://lfd.niedersachsen.de" target="_blank" rel="noopener noreferrer"
+          >lfd.niedersachsen.de</a
+        >
+      </p>
+
+      <p class="datenschutz__note">Stand: Juni 2026</p>
     </Container>
   </section>
 </BaseLayout>
@@ -30,5 +144,32 @@ import Heading from "../components/ui/Heading.astro";
 <style>
   .section {
     padding-block: var(--space-2xl);
+  }
+
+  .datenschutz__subheading {
+    margin-block-start: var(--space-xl);
+    margin-block-end: var(--space-2xs);
+    font-size: var(--text-lg);
+  }
+
+  .datenschutz__block {
+    margin-block: 0 var(--space-sm);
+    line-height: 1.6;
+  }
+
+  .datenschutz__list {
+    margin-block: 0 var(--space-sm);
+    padding-inline-start: var(--space-lg);
+    line-height: 1.6;
+  }
+
+  .datenschutz__list li {
+    margin-block-end: var(--space-3xs);
+  }
+
+  .datenschutz__note {
+    margin-block-start: var(--space-xl);
+    font-size: var(--text-sm);
+    opacity: 0.7;
   }
 </style>
