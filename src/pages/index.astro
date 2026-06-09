@@ -424,11 +424,12 @@ function formatEventDate(isoDate: string): string {
     transform: rotate(-15deg);
   }
 
-  /* Kind unten rechts, etwas weiter hoch gesetzt (block-end: 4%).
-     Inline-end -2% lässt es knapp über den rechten Rand ragen. */
+  /* Kind unten rechts: weiter nach rechts geschoben (inline-end -14%),
+     sodass es nur noch knapp am rechten Rand angeschnitten ist, und
+     etwas höher gesetzt (block-end 11%). */
   .hero__cutout--mid-right {
-    inset-block-end: 4%;
-    inset-inline-end: -2%;
+    inset-block-end: 11%;
+    inset-inline-end: -14%;
     width: 310px;
   }
 
@@ -607,7 +608,7 @@ function formatEventDate(isoDate: string): string {
        wandert die Cow nicht nach unten wenn der Body aufgeklappt
        wird. 240 px matched die vertikale Mitte des Section-Inhalts
        im zugeklappten Zustand. */
-    inset-block-start: 240px;
+    inset-block-start: 200px;
     inset-inline-start: 0;
     width: 266px;
     aspect-ratio: 1 / 1;
@@ -627,14 +628,14 @@ function formatEventDate(isoDate: string): string {
     max-width: none;
   }
 
-  /* Heading + Body rücken nach rechts, damit die angeschnittene Cow
-     sichtbar bleibt und der Text nicht überlappt wird. Margin statt
-     Padding, damit die Text-Box selbst verschoben wird. */
+  /* Heading + Body rücken nur leicht nach rechts. Der Text darf bewusst
+     mit dem Kuh-Cutout überlappen, damit die Textzeilen breiter werden.
+     z-index 1 hält den Text über der Kuh lesbar. */
   .about__heading,
   .about__body {
     position: relative;
     z-index: 1;
-    margin-inline-start: 200px;
+    margin-inline-start: 0;
   }
 
   /* Section-Headline-Skala (32–56px), grosse Display-Headlines.

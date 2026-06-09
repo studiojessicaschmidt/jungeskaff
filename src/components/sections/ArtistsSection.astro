@@ -76,8 +76,8 @@ const { heading } = Astro.props;
                   class="artist__image"
                   src={artist.image}
                   alt={`Porträtfoto von ${artist.name}`}
-                  width={480}
-                  height={480}
+                  widths={[240, 320, 480, 640, 685]}
+                  sizes="(min-width: 75em) 320px, (min-width: 48em) 240px, 92vw"
                   loading="lazy"
                 />
               ) : (

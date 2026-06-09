@@ -131,8 +131,34 @@ const {
 
   .site-footer__inner {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
+    /* Mobile: zwei Spalten, damit die Breite genutzt wird. Links die
+       Seiten-Links, rechts Rechtliches (Impressum/Datenschutz) und
+       Presse/KaFF Fischerhude untereinander. Studio-Credit volle Breite. */
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-lg);
+    row-gap: var(--space-lg);
+  }
+
+  /* Reihenfolge der Sections: 1 Seiten-Links, 2 Rechtliches,
+     3 Presse/KaFF, 4 Studio-Credit. */
+  .site-footer__section:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .site-footer__section:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .site-footer__section:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .site-footer__credit {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 
   .site-footer__section {
@@ -173,11 +199,20 @@ const {
     gap: var(--space-3xs);
   }
 
-  /* Ab 48em vier nebeneinanderliegende Spalten. */
+  /* Ab 48em vier nebeneinanderliegende Spalten. Mobile-Platzierung
+     zurücksetzen, damit jede Section in ihrer eigenen Spalte steht. */
   @media (min-width: 48em) {
     .site-footer__inner {
       grid-template-columns: repeat(4, 1fr);
       align-items: start;
+    }
+
+    .site-footer__section:nth-child(1),
+    .site-footer__section:nth-child(2),
+    .site-footer__section:nth-child(3),
+    .site-footer__credit {
+      grid-column: auto;
+      grid-row: auto;
     }
   }
 </style>

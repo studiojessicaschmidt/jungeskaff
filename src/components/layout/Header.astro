@@ -126,7 +126,8 @@ const { brandName = "[KUNDE: Markenname]", brandHref = "/", navItems = defaultNa
   .site-header__list {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    /* Mobile: eine Reihe, kein Umbruch — sitzt auf Brand-Höhe. */
+    flex-wrap: nowrap;
     gap: var(--space-sm);
     margin: 0;
     padding: 0;
@@ -135,6 +136,12 @@ const { brandName = "[KUNDE: Markenname]", brandHref = "/", navItems = defaultNa
 
   .site-header__item + .site-header__item {
     margin-block-start: 0;
+  }
+
+  /* Mobile: "Kontakt" (4. Eintrag) ausblenden, damit Galerie / Über uns /
+     Events einreihig nebeneinander passen. Ab Tablet wieder sichtbar. */
+  .site-header__item:nth-child(4) {
+    display: none;
   }
 
   .site-header__link {
@@ -169,10 +176,16 @@ const { brandName = "[KUNDE: Markenname]", brandHref = "/", navItems = defaultNa
   @media (min-width: 48em) {
     .site-header__list {
       gap: var(--space-md);
+      flex-wrap: wrap;
     }
 
     .site-header__link {
       font-size: var(--text-lg);
+    }
+
+    /* Ab Tablet "Kontakt" wieder einblenden. */
+    .site-header__item:nth-child(4) {
+      display: revert;
     }
   }
 </style>
